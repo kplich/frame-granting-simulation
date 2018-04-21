@@ -4,7 +4,7 @@ import java.util.*;
  * Process class.
  * Size of the process corresponds to the number of process' pages.
  */
-public class ProcessWithFaultRate {
+public class ProcessWithWorkingSet {
 	private int processSize;
 	private int framesGranted;
 	private int numberOfRequests;
@@ -12,16 +12,14 @@ public class ProcessWithFaultRate {
 	public int pageFaults;
 	private int framesUsed;
 
-	//hit - true, miss - false
-	private LinkedList<Boolean> hitMissTable;
-	private double faultRate;
+	private LinkedList<LRUPage> workingSet;
 
 	private ArrayList<LRUPage> pageTable;
 	private ArrayList<Frame<LRUPage>> frameTable;
 	private LinkedList<LRUPage> requestQueue;
 
 
-	public ProcessWithFaultRate(final int processSize, int framesGranted, int numberOfRequests) {
+	public ProcessWithWorkingSet(final int processSize, int framesGranted, int numberOfRequests) {
 		this.pageFaults = 0;
 		this.processSize = processSize;
 		this.numberOfRequests = numberOfRequests;
@@ -40,7 +38,7 @@ public class ProcessWithFaultRate {
 
 		requestQueue = new LinkedList<>();
 
-		hitMissTable = new LinkedList<>();
+		workingSet = new LinkedList<>();
 	}
 
 	/**
@@ -76,7 +74,9 @@ public class ProcessWithFaultRate {
 	}
 
 	public void dealWithAPage() {
-		dealWithRequest(requestQueue.pollFirst());
+		LRUPage old = requestQueue.pollFirst();
+		addToWorkingSet(old);
+		dealWithRequest(old);
 	}
 
 	public void dealWithRequest(LRUPage requestedPage) {
@@ -95,10 +95,10 @@ public class ProcessWithFaultRate {
 			pageWasLoaded(requestedPage);
 		}
 
-		if(faultRate > 0.75) {
+		if(howManyFramesToGrant() < frameTable.size()) {
 			removeFrame();
 		}
-		else if(faultRate < 0.25) {
+		else if (howManyFramesToGrant() > frameTable.size()) {
 			grantFrame();
 		}
 	}
@@ -161,7 +161,7 @@ public class ProcessWithFaultRate {
 			if(o1.getPageGiven() == null) {
 				return -1;
 			}
-			else if(o2.getPageGiven() == null) {
+			else if (o2.getPageGiven() == null) {
 				return 1;
 			}
 
@@ -203,24 +203,28 @@ public class ProcessWithFaultRate {
 		System.out.println("]\n------------------\n");
 	}
 
-	private void addValueAndCalculateRate(boolean hitOrMiss) {
-		if(hitMissTable.size() >= 10) {
-			hitMissTable.pollFirst();
+	private void addToWorkingSet(LRUPage oldPage) {
+		if(workingSet.size() >= 10) {
+			workingSet.pollFirst();
 		}
-		hitMissTable.add(hitOrMiss);
+		workingSet.add(oldPage);
+	}
 
-		int count = 0;
-		for(Boolean b: hitMissTable) {
-			if(!b) {
-				++count;
+	private int howManyFramesToGrant() {
+		ArrayList<LRUPage> usedPages = new ArrayList<>();
+
+		for(LRUPage p: workingSet) {
+			if(!usedPages.contains(p)) {
+				usedPages.add(p);
 			}
 		}
-		faultRate = (double) (count/10);
+
+		return usedPages.size();
 	}
 
 	private void removeFrame() {
 		sortFramesByIndex();
-		frameTable.remove(frameTable.size());
+		frameTable.remove(frameTable.size() - 1);
 	}
 
 	private void grantFrame() {

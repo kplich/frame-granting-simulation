@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class FaultRateGranting {
+public class WorkingSetGranting {
 	public static void main(String[] args) {
 		Random rng = new Random();
 
@@ -9,24 +9,24 @@ public class FaultRateGranting {
 		int numberOfRequests = 100;
 		int numberOfProcesses = 15;
 
-		ArrayList<ProcessWithFaultRate> processes = new ArrayList<>();
+		ArrayList<ProcessWithWorkingSet> processes = new ArrayList<>();
 
 		for (int i = 0; i < numberOfProcesses; ++i) {
-			processes.add(new ProcessWithFaultRate(rng.nextInt(20) + 1, framesGranted, numberOfRequests));
+			processes.add(new ProcessWithWorkingSet(rng.nextInt(20) + 1, framesGranted, numberOfRequests));
 		}
 
-		for (ProcessWithFaultRate p : processes) {
+		for (ProcessWithWorkingSet p : processes) {
 			p.generateRequests();
 		}
 
 		for (int i = 0; i < numberOfProcesses; ++i) {
-			for (ProcessWithFaultRate p : processes) {
+			for (ProcessWithWorkingSet p : processes) {
 				p.dealWithAPage();
 			}
 		}
 
 		int sum = 0;
-		for (ProcessWithFaultRate p : processes) {
+		for (ProcessWithWorkingSet p : processes) {
 			sum += p.pageFaults;
 		}
 		System.out.println(sum + "\t");

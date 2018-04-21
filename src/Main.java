@@ -2,7 +2,7 @@ public class Main {
 	public static void main(String[] args) {
 
 		for(int i = 0; i<2000; ++i) {
-			FaultRateGranting.main(null);
+			WorkingSetGranting.main(null);
 		}
 
 	}
