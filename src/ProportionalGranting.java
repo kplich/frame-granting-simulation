@@ -10,7 +10,7 @@ public class ProportionalGranting {
 		ArrayList<Process> processes = new ArrayList<>();
 
 		for(int i = 0; i<numberOfProcesses; ++i) {
-			int processSize = rng.nextInt(20) + 1;
+			int processSize = rng.nextInt(20) + 5;
 			int framesGranted = (int) (0.75*processSize);
 			processes.add(new Process(processSize, framesGranted, numberOfRequests));
 		}
@@ -26,10 +26,9 @@ public class ProportionalGranting {
 		}
 
 		int sum = 0;
-		for(Process p: processes) {
-			System.out.println(p.pageFaults);
+		for (Process p : processes) {
 			sum += p.pageFaults;
 		}
-		System.out.println("\n" + sum);
+		System.out.println(sum + "\t");
 	}
 }
