@@ -23,7 +23,7 @@ public class Main {
 			int tempProcessSize = rng.nextInt(processSize);
 
 			equalGranting.add(new proc.Process(tempProcessSize, numberOfFrames, simulationSize));
-			proportionalGranting.add(new proc.Process(tempProcessSize, (int)(0.15 * tempProcessSize), simulationSize));
+			proportionalGranting.add(new proc.Process(tempProcessSize, (int)(0.15 * tempProcessSize) + 1, simulationSize));
 			faultRateGranting.add(new proc.ProcessWithFaultRate(tempProcessSize, numberOfFrames, simulationSize));
 			workingSetGranting.add(new proc.ProcessWithWorkingSet(tempProcessSize, numberOfFrames, simulationSize));
 		}

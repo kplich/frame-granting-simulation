@@ -39,6 +39,7 @@ public class Process {
 		}
 
 		requestQueue = new LinkedList<>();
+		generateRequests();
 	}
 
 	/**
@@ -134,6 +135,13 @@ public class Process {
 	//na poczatku listy niech znajda sie ramki ktore zostaly najdawniej uzyte
 	protected void sortFramesByTimeSinceReference() {
 		frameTable.sort((o1, o2) -> {
+			if(o1.getPageGiven() == null) {
+				return 1;
+			}
+			else if(o2.getPageGiven() == null) {
+				return -1;
+			}
+
 			int timeOfPage1 = o1.getPageGiven().getTimeSinceLastReference();
 			int timeOfPage2 = o2.getPageGiven().getTimeSinceLastReference();
 
