@@ -1,3 +1,5 @@
+package frames_pages;
+
 public class Frame {
 	int frameIndex;
 	Page pageGiven;

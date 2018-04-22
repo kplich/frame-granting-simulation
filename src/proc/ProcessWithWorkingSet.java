@@ -1,7 +1,12 @@
+package proc;
+
+import frames_pages.*;
+
+
 import java.util.*;
 
 /**
- * Process class.
+ * proc.Process class.
  * Size of the process corresponds to the number of process' pages.
  */
 public class ProcessWithWorkingSet extends Process {
@@ -18,7 +23,7 @@ public class ProcessWithWorkingSet extends Process {
 	@Override
 	public void dealWithRequest() {
 		Page requestedPage = requestQueue.pollFirst();
-		assert requestedPage != null : "Page mustn't be null!";
+		assert requestedPage != null : "frames_pages.Page mustn't be null!";
 
 		markTimeSinceLastRef();
 

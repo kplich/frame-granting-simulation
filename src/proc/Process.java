@@ -1,7 +1,11 @@
+package proc;
+
+import frames_pages.*;
+
 import java.util.*;
 
 /**
- * Process class.
+ * proc.Process class.
  * Size of the process corresponds to the number of process' pages.
  */
 public class Process {
@@ -17,7 +21,7 @@ public class Process {
 	protected LinkedList<Page> requestQueue;
 
 
-	public Process(final int processSize, int framesGranted, int numberOfRequests) {
+	public Process(int processSize, int framesGranted, int numberOfRequests) {
 		this.pageFaults = 0;
 		this.processSize = processSize;
 		this.numberOfRequests = numberOfRequests;
@@ -42,7 +46,7 @@ public class Process {
 	 */
 	protected void generateRequests() {
 		assert requestQueue != null: "Request queue mustn't be null!";
-		assert pageTable != null: "Page table mustn't be null!";
+		assert pageTable != null: "frames_pages.Page table mustn't be null!";
 
 		Random rng = new Random();
 
@@ -71,7 +75,7 @@ public class Process {
 
 	public void dealWithRequest() {
 		Page requestedPage = requestQueue.pollFirst();
-		assert requestedPage != null: "Page mustn't be null!";
+		assert requestedPage != null: "frames_pages.Page mustn't be null!";
 
 		markTimeSinceLastRef();
 
@@ -162,5 +166,9 @@ public class Process {
 
 		}
 		System.out.println("]\n------------------\n");
+	}
+
+	public int getPageFaults() {
+		return pageFaults;
 	}
 }

@@ -1,3 +1,5 @@
+package frames_pages;
+
 /**
  * Simple wrapper class created to make creating a sortable page table possible.
  */
@@ -10,7 +12,7 @@ public class Page {
 	/**
 	 * Index of a frame a page has been given (or -1 if page isn't loaded in to memory).
 	 */
-	private  int frameGiven;
+	private int frameGiven;
 
 	private int timeSinceLastReference;
 
