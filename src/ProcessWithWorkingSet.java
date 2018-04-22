@@ -15,7 +15,7 @@ public class ProcessWithWorkingSet {
 	private LinkedList<LRUPage> workingSet;
 
 	private ArrayList<LRUPage> pageTable;
-	private ArrayList<Frame<LRUPage>> frameTable;
+	private ArrayList<Frame> frameTable;
 	private LinkedList<LRUPage> requestQueue;
 
 
@@ -110,7 +110,7 @@ public class ProcessWithWorkingSet {
 	}
 
 	private void markTimeSinceLastRef() {
-		for (Frame<LRUPage> frame : frameTable) {
+		for (Frame frame : frameTable) {
 			if (frame.getPageGiven() != null) {
 				frame.getPageGiven().countTimeSinceLastReference();
 			}

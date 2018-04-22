@@ -5,16 +5,16 @@ import java.util.*;
  * Size of the process corresponds to the number of process' pages.
  */
 public class Process {
-	private int processSize;
-	private int framesGranted;
-	private int numberOfRequests;
+	protected int processSize;
+	protected int framesGranted;
+	protected int numberOfRequests;
 
-	public int pageFaults;
-	private int framesUsed;
+	protected int pageFaults;
+	protected int framesUsed;
 
-	private ArrayList<LRUPage> pageTable;
-	private ArrayList<Frame<LRUPage>> frameTable;
-	private LinkedList<LRUPage> requestQueue;
+	protected ArrayList<Page> pageTable;
+	protected ArrayList<Frame> frameTable;
+	protected LinkedList<Page> requestQueue;
 
 
 	public Process(final int processSize, int framesGranted, int numberOfRequests) {
@@ -24,14 +24,14 @@ public class Process {
 
 		pageTable = new ArrayList<>();
 		for(int i = 0; i<processSize; ++i) {
-			pageTable.add(new LRUPage(i, -1));
+			pageTable.add(new Page(i, -1));
 		}
 
 		this.framesGranted = framesGranted;
 
 		frameTable = new ArrayList<>();
 		for(int i = 0; i<framesGranted; ++i) {
-			frameTable.add(new Frame<>(i, null));
+			frameTable.add(new Frame(i, null));
 		}
 
 		requestQueue = new LinkedList<>();
@@ -40,7 +40,7 @@ public class Process {
 	/**
 	 * Generates a page request sequence for the process
 	 */
-	public void generateRequests() {
+	protected void generateRequests() {
 		assert requestQueue != null: "Request queue mustn't be null!";
 		assert pageTable != null: "Page table mustn't be null!";
 
@@ -69,12 +69,11 @@ public class Process {
 		}
 	}
 
-	public void dealWithAPage() {
-		dealWithRequest(requestQueue.pollFirst());
-	}
+	public void dealWithRequest() {
+		Page requestedPage = requestQueue.pollFirst();
+		assert requestedPage != null: "Page mustn't be null!";
 
-	public void dealWithRequest(LRUPage requestedPage) {
-		prepare();
+		markTimeSinceLastRef();
 
 		//printOut(requestedPage);
 
@@ -86,33 +85,19 @@ public class Process {
 			allocate(requestedPage);
 		}
 		else {
-			pageWasLoaded(requestedPage);
+			requestedPage.setTimeSinceLastReference(0);
 		}
 	}
 
-	private void prepare() {
-		markTimeSinceLastRef();
-		sortPagesByIndex();
-		sortFramesByIndex();
-	}
-
-	private void markTimeSinceLastRef() {
-		for (Frame<LRUPage> frame : frameTable) {
+	protected void markTimeSinceLastRef() {
+		for (Frame frame : frameTable) {
 			if (frame.getPageGiven() != null) {
 				frame.getPageGiven().countTimeSinceLastReference();
 			}
 		}
 	}
 
-	protected void sortPagesByIndex() {
-		pageTable.sort(Comparator.comparingInt(Page::getPageNumber));
-	}
-
-	protected void sortFramesByIndex() {
-		frameTable.sort(Comparator.comparingInt(Frame::getFrameIndex));
-	}
-
-	public void freeUpSomeMemory() {
+		public void freeUpSomeMemory() {
 		//sprawdzamy czy sa jeszcze wolne ramki - wtedy ustawiamy je na poczatek
 		if (framesUsed < framesGranted) {
 			sortFramesByPageUsed();
@@ -143,7 +128,7 @@ public class Process {
 	}
 
 	//na poczatku listy niech znajda sie ramki ktore zostaly najdawniej uzyte
-	private void sortFramesByTimeSinceReference() {
+	protected void sortFramesByTimeSinceReference() {
 		frameTable.sort((o1, o2) -> {
 			int timeOfPage1 = o1.getPageGiven().getTimeSinceLastReference();
 			int timeOfPage2 = o2.getPageGiven().getTimeSinceLastReference();
@@ -152,7 +137,7 @@ public class Process {
 		});
 	}
 
-	public void allocate(LRUPage requestedPage) {
+	protected void allocate(Page requestedPage) {
 		//utworz nowe polaczenie!
 		frameTable.get(0).setPageGiven(requestedPage);
 		requestedPage.setFrameGiven(frameTable.get(0).getFrameIndex());
@@ -160,11 +145,7 @@ public class Process {
 		++framesUsed;
 	}
 
-	public void pageWasLoaded(LRUPage requestedPage) {
-		requestedPage.setTimeSinceLastReference(0); //gdy ramka zostala uzyta, wyzeruj jej czas od ostatniej referencji
-	}
-
-	private void printOut(LRUPage requestedPage) {
+	protected void printOut(Page requestedPage) {
 		System.out.println("number of page errors: " + pageFaults + "\n");
 		System.out.println("requested page number: " + requestedPage.getPageNumber());
 		System.out.println("requested page's frame: " + requestedPage.getFrameGiven());

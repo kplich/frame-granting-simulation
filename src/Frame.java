@@ -1,8 +1,8 @@
-public class Frame<P extends Page> {
+public class Frame {
 	int frameIndex;
-	P pageGiven;
+	Page pageGiven;
 
-	public Frame(int frameIndex, P pageGiven) {
+	public Frame(int frameIndex, Page pageGiven) {
 		this.frameIndex = frameIndex;
 		this.pageGiven = pageGiven;
 	}
@@ -15,11 +15,11 @@ public class Frame<P extends Page> {
 		this.frameIndex = frameIndex;
 	}
 
-	public P getPageGiven() {
+	public Page getPageGiven() {
 		return pageGiven;
 	}
 
-	public void setPageGiven(P pageGiven) {
+	public void setPageGiven(Page pageGiven) {
 		this.pageGiven = pageGiven;
 	}
 }
