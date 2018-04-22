@@ -5,16 +5,19 @@ public class Page {
 	/**
 	 * Number of a page.
 	 */
-	protected int pageNumber;
+	private int pageNumber;
 
 	/**
 	 * Index of a frame a page has been given (or -1 if page isn't loaded in to memory).
 	 */
-	protected int frameGiven;
+	private  int frameGiven;
+
+	private int timeSinceLastReference;
 
 	public Page(int pageNumber, int frameGiven) {
 		this.pageNumber = pageNumber;
 		this.frameGiven = frameGiven;
+		timeSinceLastReference = 0;
 	}
 
 	public int getPageNumber() {
@@ -31,5 +34,17 @@ public class Page {
 
 	public void setFrameGiven(int frameGiven) {
 		this.frameGiven = frameGiven;
+	}
+
+	public int getTimeSinceLastReference() {
+		return timeSinceLastReference;
+	}
+
+	public void setTimeSinceLastReference(int timeSinceLastReference) {
+		this.timeSinceLastReference = timeSinceLastReference;
+	}
+
+	public void countTimeSinceLastReference() {
+		++timeSinceLastReference;
 	}
 }
