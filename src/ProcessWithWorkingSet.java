@@ -4,87 +4,27 @@ import java.util.*;
  * Process class.
  * Size of the process corresponds to the number of process' pages.
  */
-public class ProcessWithWorkingSet {
-	private int processSize;
-	private int framesGranted;
-	private int numberOfRequests;
+public class ProcessWithWorkingSet extends Process {
+	private int pastReferencesNumber = 50;
 
-	public int pageFaults;
-	private int framesUsed;
-
-	private LinkedList<LRUPage> workingSet;
-
-	private ArrayList<LRUPage> pageTable;
-	private ArrayList<Frame> frameTable;
-	private LinkedList<LRUPage> requestQueue;
+	private LinkedList<Page> completedRequests;
 
 
 	public ProcessWithWorkingSet(final int processSize, int framesGranted, int numberOfRequests) {
-		this.pageFaults = 0;
-		this.processSize = processSize;
-		this.numberOfRequests = numberOfRequests;
-
-		pageTable = new ArrayList<>();
-		for(int i = 0; i<processSize; ++i) {
-			pageTable.add(new LRUPage(i, -1));
-		}
-
-		this.framesGranted = framesGranted;
-
-		frameTable = new ArrayList<>();
-		for(int i = 0; i<framesGranted; ++i) {
-			frameTable.add(new Frame<>(i, null));
-		}
-
-		requestQueue = new LinkedList<>();
-
-		workingSet = new LinkedList<>();
+		super(processSize, framesGranted, numberOfRequests);
+		completedRequests = new LinkedList<>();
 	}
 
-	/**
-	 * Generates a page request sequence for the process
-	 */
-	public void generateRequests() {
-		assert requestQueue != null: "Request queue mustn't be null!";
-		assert pageTable != null: "Page table mustn't be null!";
+	@Override
+	public void dealWithRequest() {
+		Page requestedPage = requestQueue.pollFirst();
+		assert requestedPage != null : "Page mustn't be null!";
 
-		Random rng = new Random();
-
-		while(requestQueue.size() < numberOfRequests) {
-			double randomChance = rng.nextDouble();
-			int newPageIndex = 0;
-
-			try {
-				if (requestQueue.size() == 0 || randomChance < 0.1) {
-					newPageIndex = rng.nextInt(processSize);
-				}
-				else if (randomChance < 0.55) {
-					newPageIndex = requestQueue.peekLast().getPageNumber() + rng.nextInt((int) (0.05 * processSize) + 1);
-				}
-				else {
-					newPageIndex = requestQueue.peekLast().getPageNumber() - rng.nextInt((int) (0.05 * processSize) + 1);
-				}
-
-				requestQueue.add(pageTable.get(newPageIndex));
-			}
-			catch (IndexOutOfBoundsException e) {
-
-			}
-		}
-	}
-
-	public void dealWithAPage() {
-		LRUPage old = requestQueue.pollFirst();
-		addToWorkingSet(old);
-		dealWithRequest(old);
-	}
-
-	public void dealWithRequest(LRUPage requestedPage) {
-		prepare();
+		markTimeSinceLastRef();
 
 		//printOut(requestedPage);
 
-		if(requestedPage.getFrameGiven() < 0) { //page requested isn't loaded into a frame
+		if (requestedPage.getFrameGiven() < 0) { //page requested isn't loaded into a frame
 			++pageFaults;
 
 			freeUpSomeMemory();
@@ -92,143 +32,50 @@ public class ProcessWithWorkingSet {
 			allocate(requestedPage);
 		}
 		else {
-			pageWasLoaded(requestedPage);
+			requestedPage.setTimeSinceLastReference(0);
 		}
 
-		if(howManyFramesToGrant() < frameTable.size()) {
-			removeFrame();
-		}
-		else if (howManyFramesToGrant() > frameTable.size()) {
-			grantFrame();
-		}
-	}
+		int workingSetSize = calculateWorkingSet(requestedPage);
 
-	private void prepare() {
-		markTimeSinceLastRef();
-		sortPagesByIndex();
-		sortFramesByIndex();
-	}
-
-	private void markTimeSinceLastRef() {
-		for (Frame frame : frameTable) {
-			if (frame.getPageGiven() != null) {
-				frame.getPageGiven().countTimeSinceLastReference();
+		if(workingSetSize > 0) {
+			if (workingSetSize < framesGranted) {
+				removeFrame();
+			}
+			else if (workingSetSize > framesGranted) {
+				grantFrame();
 			}
 		}
 	}
 
-	protected void sortPagesByIndex() {
-		pageTable.sort(Comparator.comparingInt(Page::getPageNumber));
-	}
-
-	protected void sortFramesByIndex() {
-		frameTable.sort(Comparator.comparingInt(Frame::getFrameIndex));
-	}
-
-	public void freeUpSomeMemory() {
-		//sprawdzamy czy sa jeszcze wolne ramki - wtedy ustawiamy je na poczatek
-		if (framesUsed < framesGranted) {
-			sortFramesByPageUsed();
-		}
-		//jesli nie ma, sortujemy ramki wedlug zadanego przez algorytm kryterium
-		else {
-			sortFramesByTimeSinceReference();
-		}
-
-		//jesli w ramce znajdowala sie jakas strona to znaczy
-		//ze trzeba ja bylo usunac i faktycznie mamy mniej uzytych ramek
-		if (frameTable.get(0).getPageGiven() != null) {
-			--framesUsed;
-
-			//usun poprzednie polaczenie!
-			frameTable.get(0).getPageGiven().setFrameGiven(-1);
-			frameTable.get(0).getPageGiven().setTimeSinceLastReference(0);
-		}
-	}
-
-	//po prostu przesun puste ramki na poczatek listy
-	protected void sortFramesByPageUsed() {
-		frameTable.sort((o1, o2) -> {
-			if (o1.getPageGiven() == null) return -1;
-			else if (o2.getPageGiven() == null) return 1;
-			else return 0;
-		});
-	}
-
-	//na poczatku listy niech znajda sie ramki ktore zostaly najdawniej uzyte
-	private void sortFramesByTimeSinceReference() {
-		frameTable.sort((o1, o2) -> {
-			if(o1.getPageGiven() == null) {
-				return -1;
+	private int calculateWorkingSet(Page requestedPage) {
+		if(completedRequests.size() > pastReferencesNumber/3) {
+			if(completedRequests.size() > pastReferencesNumber) {
+				completedRequests.removeFirst();
 			}
-			else if (o2.getPageGiven() == null) {
-				return 1;
+			completedRequests.add(requestedPage);
+
+			ArrayList<Page> distinctPages = new ArrayList<>();
+			for(Page page: completedRequests) {
+				if(!distinctPages.contains(page)) {
+					distinctPages.add(page);
+				}
 			}
 
-			int timeOfPage1 = o1.getPageGiven().getTimeSinceLastReference();
-			int timeOfPage2 = o2.getPageGiven().getTimeSinceLastReference();
-
-			return -Integer.compare(timeOfPage1, timeOfPage2);
-		});
-	}
-
-	public void allocate(LRUPage requestedPage) {
-		//utworz nowe polaczenie!
-		frameTable.get(0).setPageGiven(requestedPage);
-		requestedPage.setFrameGiven(frameTable.get(0).getFrameIndex());
-		requestedPage.setTimeSinceLastReference(0);
-		++framesUsed;
-	}
-
-	public void pageWasLoaded(LRUPage requestedPage) {
-		requestedPage.setTimeSinceLastReference(0); //gdy ramka zostala uzyta, wyzeruj jej czas od ostatniej referencji
-	}
-
-	private void printOut(LRUPage requestedPage) {
-		System.out.println("number of page errors: " + pageFaults + "\n");
-		System.out.println("requested page number: " + requestedPage.getPageNumber());
-		System.out.println("requested page's frame: " + requestedPage.getFrameGiven());
-
-		System.out.println("memory:");
-		System.out.print("[");
-		for (Frame frame : frameTable) {
-			if (frame.getPageGiven() == null) {
-				System.out.print("-\t");
-			}
-			else {
-				System.out.print(frame.getPageGiven().getPageNumber() + "\t");
-			}
-
+			return distinctPages.size();
 		}
-		System.out.println("]\n------------------\n");
-	}
-
-	private void addToWorkingSet(LRUPage oldPage) {
-		if(workingSet.size() >= 10) {
-			workingSet.pollFirst();
-		}
-		workingSet.add(oldPage);
-	}
-
-	private int howManyFramesToGrant() {
-		ArrayList<LRUPage> usedPages = new ArrayList<>();
-
-		for(LRUPage p: workingSet) {
-			if(!usedPages.contains(p)) {
-				usedPages.add(p);
-			}
-		}
-
-		return usedPages.size();
+		return -1;
 	}
 
 	private void removeFrame() {
-		sortFramesByIndex();
-		frameTable.remove(frameTable.size() - 1);
+		if (framesGranted > 1) {
+			sortFramesByTimeSinceReference();
+			frameTable.remove(0);
+			--framesGranted;
+		}
 	}
 
 	private void grantFrame() {
-		sortFramesByIndex();
-		frameTable.add(new Frame<>(frameTable.size(), null));
+		frameTable.add(new Frame(framesGranted++, null));
+
 	}
 }
