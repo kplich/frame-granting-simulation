@@ -105,11 +105,11 @@ public class Process {
 		public void freeUpSomeMemory() {
 		//sprawdzamy czy sa jeszcze wolne ramki - wtedy ustawiamy je na poczatek
 		if (framesUsed < framesGranted) {
-			sortFramesByPageUsed();
+			sortFramesByPageUsed(frameTable);
 		}
 		//jesli nie ma, sortujemy ramki wedlug zadanego przez algorytm kryterium
 		else {
-			sortFramesByTimeSinceReference();
+			sortFramesByTimeSinceReference(frameTable);
 		}
 
 		//jesli w ramce znajdowala sie jakas strona to znaczy
@@ -124,16 +124,19 @@ public class Process {
 	}
 
 	//po prostu przesun puste ramki na poczatek listy
-	protected void sortFramesByPageUsed() {
+	public static void sortFramesByPageUsed(ArrayList<Frame> frameTable) {
 		frameTable.sort((o1, o2) -> {
-			if (o1.getPageGiven() == null) return -1;
-			else if (o2.getPageGiven() == null) return 1;
+			if (o1.getPageGiven() == null)
+				return -1;
+			else if (o2.getPageGiven() == null)
+				return 1;
+
 			else return 0;
 		});
 	}
 
 	//na poczatku listy niech znajda sie ramki ktore zostaly najdawniej uzyte
-	protected void sortFramesByTimeSinceReference() {
+	public static void sortFramesByTimeSinceReference(ArrayList<Frame> frameTable) {
 		frameTable.sort((o1, o2) -> {
 			if(o1.getPageGiven() == null) {
 				return 1;

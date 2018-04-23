@@ -73,7 +73,7 @@ public class ProcessWithWorkingSet extends Process {
 
 	private void removeFrame() {
 		if (framesGranted > 1) {
-			sortFramesByTimeSinceReference();
+			sortFramesByTimeSinceReference(frameTable);
 			frameTable.remove(0);
 			--framesGranted;
 		}

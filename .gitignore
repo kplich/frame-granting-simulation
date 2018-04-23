@@ -25,3 +25,4 @@ hs_err_pid*
 
 .idea/
 SO 4.iml
+/test/
