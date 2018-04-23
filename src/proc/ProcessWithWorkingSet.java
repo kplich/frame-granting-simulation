@@ -20,6 +20,17 @@ public class ProcessWithWorkingSet extends Process {
 		completedRequests = new LinkedList<>();
 	}
 
+	public ProcessWithWorkingSet(ArrayList<Frame> frameTable, ArrayList<Page> pageTable, LinkedList<Page> requestQueue) {
+		super(frameTable, pageTable, requestQueue);
+
+		completedRequests = new LinkedList<>();
+	}
+
+	public ProcessWithWorkingSet(final int processSize, int framesGranted, int numberOfRequests, LinkedList<Page> requestQueue) {
+		super(processSize, framesGranted, numberOfRequests, requestQueue);
+		completedRequests = new LinkedList<>();
+	}
+
 	@Override
 	public void dealWithRequest() {
 		Page requestedPage = requestQueue.pollFirst();

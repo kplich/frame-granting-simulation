@@ -21,6 +21,18 @@ public class ProcessWithFaultRate extends Process {
 		hitQueue = new LinkedList<>();
 	}
 
+	public ProcessWithFaultRate(ArrayList<Frame> frameTable, ArrayList<Page> pageTable, LinkedList<Page> requestQueue) {
+		super(frameTable, pageTable, requestQueue);
+
+		hitQueue = new LinkedList<>();
+	}
+
+	public ProcessWithFaultRate(int processSize, int framesGranted, int numberOfRequests, LinkedList<Page> requestQueue) {
+		super(processSize, framesGranted, numberOfRequests, requestQueue);
+
+		hitQueue = new LinkedList<>();
+	}
+
 	public void dealWithRequest() {
 		Page requestedPage = requestQueue.pollFirst();
 		assert requestedPage != null : "frames_pages.Page mustn't be null!";

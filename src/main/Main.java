@@ -1,15 +1,16 @@
 package main;
 
+import frames_pages.*;
 import proc.*;
 import proc.Process;
 
 import java.util.*;
 
 public class Main {
-	static int numberOfProcesses = 10;
-	static int processSize = 50;
-	static int numberOfFrames = 10;
-	static int simulationSize = 500;
+	private static int numberOfProcesses = 1;
+	private static int processSize = 10;
+	private static int numberOfFrames = 3;
+	private static int simulationSize = 100;
 
 	public static void main(String[] args) {
 		Random rng = new Random();
@@ -47,5 +48,83 @@ public class Main {
 		}
 
 		System.out.println(sum);
+	}
+
+	public static ArrayList<Page> generatePageTable(int processSize) {
+		ArrayList<Page> resultTable = new ArrayList<>();
+
+		for(int i = 0; i < processSize; ++i) {
+			resultTable.add(new Page(i, -1));
+		}
+
+		return resultTable;
+	}
+
+	public static ArrayList<Frame> generateFrameTable(int numberOfFrames) {
+		ArrayList<Frame> resultTable = new ArrayList<>();
+
+		for (int i = 0; i < numberOfFrames; ++i) {
+			resultTable.add(new Frame(i, null));
+		}
+
+		return resultTable;
+	}
+
+	public static LinkedList<Page> generateRequests(int simulationSize, ArrayList<Page> pageTable) {
+		LinkedList<Page> resultQueue = new LinkedList<>();
+		Random rng = new Random();
+
+		while (resultQueue.size() < simulationSize) {
+			double randomChance = rng.nextDouble();
+			int newPageIndex = 0;
+
+			try {
+				if (resultQueue.size() == 0 || randomChance < 0.1) {
+					newPageIndex = rng.nextInt(processSize);
+				}
+				else if (randomChance < 0.55) {
+					newPageIndex = resultQueue.peekLast().getPageNumber() + rng.nextInt((int) (0.05 * processSize) + 1);
+				}
+				else {
+					newPageIndex = resultQueue.peekLast().getPageNumber() - rng.nextInt((int) (0.05 * processSize) + 1);
+				}
+
+				resultQueue.add(pageTable.get(newPageIndex));
+			}
+			catch (IndexOutOfBoundsException e) {
+				System.out.println("krwa");
+			}
+		}
+
+		return resultQueue;
+	}
+
+	private static List<Page> clonePageList(List<Page> list) {
+		List<Page> result;
+		if(list instanceof LinkedList) {
+			result = new LinkedList<>();
+		}
+		else if (list instanceof ArrayList) {
+			result = new ArrayList<>();
+		}
+		else {
+			return null;
+		}
+
+		for(Page p: list) {
+			result.add(new Page(p));
+		}
+
+		return result;
+	}
+
+	private static List<Frame> cloneFrameList(List<Frame> list) {
+		ArrayList<Frame> result = new ArrayList<>();
+
+		for (Frame f: list) {
+			result.add(new Frame(f));
+		}
+
+		return result;
 	}
 }

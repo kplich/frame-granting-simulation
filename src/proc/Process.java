@@ -9,15 +9,15 @@ import java.util.*;
  * Size of the process corresponds to the number of process' pages.
  */
 public class Process {
-	protected int processSize;
 	protected int framesGranted;
+	protected int processSize;
 	protected int numberOfRequests;
 
 	protected int pageFaults;
 	protected int framesUsed;
 
-	protected ArrayList<Page> pageTable;
 	protected ArrayList<Frame> frameTable;
+	protected ArrayList<Page> pageTable;
 	protected LinkedList<Page> requestQueue;
 
 
@@ -40,6 +40,39 @@ public class Process {
 
 		requestQueue = new LinkedList<>();
 		generateRequests();
+	}
+
+	public Process(int processSize, int framesGranted, int numberOfRequests, LinkedList<Page> requestQueue) {
+		this.pageFaults = 0;
+		this.processSize = processSize;
+		this.numberOfRequests = numberOfRequests;
+
+		pageTable = new ArrayList<>();
+		for (int i = 0; i < processSize; ++i) {
+			pageTable.add(new Page(i, -1));
+		}
+
+		this.framesGranted = framesGranted;
+
+		frameTable = new ArrayList<>();
+		for (int i = 0; i < framesGranted; ++i) {
+			frameTable.add(new Frame(i, null));
+		}
+
+		this.requestQueue = requestQueue;
+	}
+
+	public Process(ArrayList<Frame> frameTable, ArrayList<Page> pageTable, LinkedList<Page> requestQueue) {
+		this.frameTable = frameTable;
+		this.pageTable = pageTable;
+		this.requestQueue = requestQueue;
+
+		this.framesGranted = frameTable.size();
+		this.processSize = pageTable.size();
+		this.numberOfRequests = requestQueue.size();
+
+		this.pageFaults = 0;
+		this.framesUsed = 0;
 	}
 
 	/**
@@ -181,5 +214,9 @@ public class Process {
 
 	public int getPageFaults() {
 		return pageFaults;
+	}
+
+	public void setRequestQueue(LinkedList<Page> requestQueue) {
+		this.requestQueue = requestQueue;
 	}
 }

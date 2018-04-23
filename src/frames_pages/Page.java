@@ -22,6 +22,12 @@ public class Page {
 		timeSinceLastReference = 0;
 	}
 
+	public Page(Page page) {
+		this.pageNumber = page.getPageNumber();
+		this.frameGiven = page.getFrameGiven();
+		this.timeSinceLastReference = page.getTimeSinceLastReference();
+	}
+
 	public int getPageNumber() {
 		return pageNumber;
 	}

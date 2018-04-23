@@ -9,6 +9,11 @@ public class Frame {
 		this.pageGiven = pageGiven;
 	}
 
+	public Frame(Frame frame) {
+		this.frameIndex = frame.getFrameIndex();
+		this.pageGiven = frame.getPageGiven();
+	}
+
 	public int getFrameIndex() {
 		return frameIndex;
 	}
