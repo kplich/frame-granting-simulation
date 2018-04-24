@@ -10,7 +10,7 @@ import java.util.*;
  * Size of the process corresponds to the number of process' pages.
  */
 public class ProcessWithWorkingSet extends Process {
-	private int pastReferencesNumber = 50;
+	private int pastReferencesNumber = 30;
 
 	private LinkedList<Page> completedRequests;
 
@@ -34,6 +34,7 @@ public class ProcessWithWorkingSet extends Process {
 	@Override
 	public void dealWithRequest() {
 		Page requestedPage = requestQueue.pollFirst();
+		completedRequests.add(requestedPage);
 		assert requestedPage != null : "frames_pages.Page mustn't be null!";
 
 		markTimeSinceLastRef();
@@ -64,7 +65,7 @@ public class ProcessWithWorkingSet extends Process {
 	}
 
 	private int calculateWorkingSet(Page requestedPage) {
-		if(completedRequests.size() > pastReferencesNumber/3) {
+		if(completedRequests.size() > pastReferencesNumber) {
 			if(completedRequests.size() > pastReferencesNumber) {
 				completedRequests.removeFirst();
 			}
@@ -92,6 +93,5 @@ public class ProcessWithWorkingSet extends Process {
 
 	private void grantFrame() {
 		frameTable.add(new Frame(framesGranted++, null));
-
 	}
 }

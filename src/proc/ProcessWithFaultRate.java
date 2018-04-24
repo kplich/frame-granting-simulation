@@ -55,10 +55,10 @@ public class ProcessWithFaultRate extends Process {
 			calculateFaultRate(true);
 		}
 
-		if(faultRate < 0.25) {
+		if(faultRate < 0.3) {
 			removeFrame();
 		}
-		else if(faultRate > 0.75) {
+		else if(faultRate > 0.7) {
 			grantFrame();
 		}
 	}

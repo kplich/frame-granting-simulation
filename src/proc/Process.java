@@ -171,15 +171,15 @@ public class Process {
 	//na poczatku listy niech znajda sie ramki ktore zostaly najdawniej uzyte
 	public static void sortFramesByTimeSinceReference(ArrayList<Frame> frameTable) {
 		frameTable.sort((o1, o2) -> {
-			if(o1.getPageGiven() == null) {
-				return 1;
-			}
-			else if(o2.getPageGiven() == null) {
-				return -1;
-			}
+			int timeOfPage1 = Integer.MAX_VALUE;
+			int timeOfPage2 = Integer.MAX_VALUE;
 
-			int timeOfPage1 = o1.getPageGiven().getTimeSinceLastReference();
-			int timeOfPage2 = o2.getPageGiven().getTimeSinceLastReference();
+			if(o1.getPageGiven() != null) {
+				timeOfPage1 = o1.getPageGiven().getTimeSinceLastReference();
+			}
+			if(o2.getPageGiven() != null) {
+				timeOfPage2 = o2.getPageGiven().getTimeSinceLastReference();
+			}
 
 			return -Integer.compare(timeOfPage1, timeOfPage2);
 		});
@@ -214,6 +214,10 @@ public class Process {
 
 	public int getPageFaults() {
 		return pageFaults;
+	}
+
+	public int getProcessSize() {
+		return processSize;
 	}
 
 	public void setRequestQueue(LinkedList<Page> requestQueue) {

@@ -19,7 +19,7 @@ public class Page {
 	public Page(int pageNumber, int frameGiven) {
 		this.pageNumber = pageNumber;
 		this.frameGiven = frameGiven;
-		timeSinceLastReference = 0;
+		timeSinceLastReference = Integer.MAX_VALUE;
 	}
 
 	public Page(Page page) {
