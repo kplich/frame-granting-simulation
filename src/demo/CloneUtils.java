@@ -17,7 +17,7 @@ public class CloneUtils {
 			return null;
 		}
 
-		for (Page p : list) {
+		for (Page p: list) {
 			result.add(new Page(p));
 		}
 
@@ -27,7 +27,7 @@ public class CloneUtils {
 	public static ArrayList<Frame> cloneFrameList(List<Frame> list) {
 		ArrayList<Frame> result = new ArrayList<>();
 
-		for (Frame f : list) {
+		for (Frame f: list) {
 			result.add(new Frame(f));
 		}
 

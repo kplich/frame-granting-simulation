@@ -9,7 +9,7 @@ import java.util.*;
  * Size of the process corresponds to the number of process' pages.
  */
 public class ProcessWithFaultRate extends Process {
-	private int pastReferencesNumber = 50;
+	private int pastReferencesNumber = 30;
 
 	//hit - true, miss - false
 	private LinkedList<Boolean> hitQueue;
@@ -55,16 +55,16 @@ public class ProcessWithFaultRate extends Process {
 			calculateFaultRate(true);
 		}
 
-		if(faultRate < 0.3) {
+		if(faultRate < 0.15) {
 			removeFrame();
 		}
-		else if(faultRate > 0.7) {
+		else if(faultRate > 0.3) {
 			grantFrame();
 		}
 	}
 
 	private void calculateFaultRate(boolean hit) {
-		if(hitQueue.size() > pastReferencesNumber) {
+		if(hitQueue.size() >= pastReferencesNumber) {
 			hitQueue.removeFirst();
 		}
 		hitQueue.add(hit);
@@ -75,7 +75,7 @@ public class ProcessWithFaultRate extends Process {
 				++missCount;
 			}
 		}
-		faultRate = (double) (missCount/pastReferencesNumber);
+		faultRate = (double) missCount/pastReferencesNumber;
 	}
 
 	private void removeFrame() {
